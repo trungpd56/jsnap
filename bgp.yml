@@ -1,0 +1,66 @@
+tests_include:
+  # - config
+  - ospf
+  - ldp
+  - inet3
+  - bgp
+
+config:
+  - command: show configuration
+
+ospf:
+  - command: show ospf neighbor
+    iterate:
+      id: neighbor-address
+      tests:
+        - err: 'OSPF neighbor lost: {{pre["neighbor-address"]}}'
+          info: 'OSPF neighbor have enough'
+          list-not-less: neighbor-address
+        - no-diff: ospf-neighbor-state
+          err: 'OSPF neighbor change state: {{pre["neighbor-address"]}} to {{post["ospf-neighbor-state"]}}'
+      xpath: ospf-neighbor
+
+ldp:
+  - command: show ldp neighbor
+    iterate:
+      id: ldp-neighbor-address
+      tests:
+        - list-not-less: ldp-neighbor-address
+          err: 'LDP neighbor lost: {{pre["ldp-neighbor-address"]}}'
+          info: 'LDP neighbor have enough'
+      xpath: ldp-neighbor
+
+inet3:
+  - command: show route table inet.3
+    iterate:
+      id: rt-destination
+      xpath: //rt
+      tests:
+        - list-not-less: rt-destination
+          err: 'List route inet3 omit: {{pre["rt-destination"]}}'
+
+bgp:
+  - command: show bgp summary
+  - iterate:
+      xpath: bgp-peer
+      id: peer-address
+      tests:
+        - list-not-less: peer-address
+          err: 'BGP neighbor lost: {{id_0}}'
+          info: 'BGP neighbor have enough'
+        - no-diff: peer-state
+          err: 'BGP state {{id_0}} from {{pre["peer-state"]}} to {{post["peer-state"]}}'
+
+  - iterate:
+      xpath: bgp-peer/bgp-rib
+      id: ../peer-address, name
+      tests:
+        - delta: active-prefix-count, 10%
+          err: 'BGP active prefix count: {{id_0}}, {{id_1}} -
+            {{pre["active-prefix-count"]}} to {{post["active-prefix-count"]}}'
+
+        - delta: received-prefix-count, 10%
+          err: 'BGP received prefix count: {{id_0}}, {{id_1}} -
+            {{pre["received-prefix-count"]}} to {{post["received-prefix-count"]}}'
+
+

@@ -1,0 +1,9 @@
+rr-internet:
+  - 172.16.1.3:
+      username: lab
+      passwd: lab123
+
+rr-vpn:
+  - 172.16.1.4:
+      username: lab
+      passwd: lab123

@@ -1,0 +1,6 @@
+hosts:
+  - include: devices.yml
+    group: rr-internet
+
+tests:
+  - bgp.yml
